@@ -1,11 +1,15 @@
-import { Elysia, NotFoundError, t } from "elysia";
-import { getConsumerByNameOrCnpj, newConsumer } from "./api";
+import { Elysia, t } from "elysia";
+import { getCustomerInfos, newCustomer, getCustomerById } from "./api";
 
 const app = new Elysia()
-  .post('/newcustomer', ({ body }) => newConsumer(body), {
+  .post('/newcustomer', ({ body }) => newCustomer(body), {
     body: t.Object({
       name: t.String(),
-      email: t.String(),
+      cpfCnpj: t.Optional(t.String()),
+      email: t.String({
+        format: 'email',
+        error: 'Invalid Email Format',
+      }),
       postalCode: t.Optional(t.String()),
     }),
   })
@@ -15,9 +19,16 @@ const app = new Elysia()
       return 'Não foi encontrado nenhum cliente com esse nome ou CNPJ.'
     }
   })
-  .get('/customers/:nameOrCnpj',  ({ params: { nameOrCnpj } }) => getConsumerByNameOrCnpj(nameOrCnpj),  {
+
+  .get('/customers/:infos',  ({ params: { infos } }) => getCustomerInfos(infos),  {
     params: t.Object({
-      nameOrCnpj: t.String(),
+      infos: t.String(),
+    }),
+  })
+
+  .get('/customer/:id', ({ params: { id } }) => getCustomerById(id), {
+    params: t.Object({
+      id: t.String(),
     }),
   })
 

@@ -1,36 +1,50 @@
-import { NotFoundError } from "elysia";
+import { NotFoundError, ValidationError } from "elysia";
 
-type Consumer = {
+type Customer = {
   name: string;
   email: string;
+  cpfCnpj?: string;
   postalCode?: string;
 }
-export const newConsumer = async (consumer: Consumer) => {
+export const newCustomer = async (customer: Customer) => {
   const url = 'https://sandbox.asaas.com/api/v3/customers';
-  consumer.postalCode = consumer.postalCode ?? "";
   const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'access_token': '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzc5MzI6OiRhYWNoXzgxMGFjMTk1LTdiNGYtNGJjNy04OTU4LWUxMmQzMmRlMjhlYQ=='
+      accept: 'application/json',
+      'access_token': Bun.env.TOKENAPI ?? '',
     },
-    body: JSON.stringify(consumer)
+    body: JSON.stringify(customer)
   });
   const data = await response.json();
   return data;
 }
 
-export const getConsumerByNameOrCnpj = async (nameOrCnpj: string) => {
-  const url = `https://sandbox.asaas.com/api/v3/customers?name=${nameOrCnpj}`;
+export const getCustomerInfos = async (infos: string) => {
+  const url = `https://sandbox.asaas.com/api/v3/customers?name=${infos}`;
   const response = await fetch(url, {
+    method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
-      'access_token': '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzc5MzI6OiRhYWNoXzgxMGFjMTk1LTdiNGYtNGJjNy04OTU4LWUxMmQzMmRlMjhlYQ=='
+      accept: 'application/json',
+      'access_token': Bun.env.TOKENAPI ?? '',
     }
   });
   const data = await response.json();
   if (data.data.length === 0) {
     throw new NotFoundError()
   }
+  return data;
+}
+
+export const getCustomerById = async (id: string) => {
+  const url = `https://sandbox.asaas.com/api/v3/customers/${id}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+      'access_token': Bun.env.TOKENAPI ?? '',
+    }
+  });
+  const data = await response.json();
   return data;
 }
